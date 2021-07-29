@@ -1,1 +1,2 @@
-# uiuc-viz
+# UIUC Enrollment Narrative Visualization
+
