@@ -1,0 +1,46 @@
+/* Design elements for pagnation */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+  
+.pagination a {
+    color: black;
+    float: left;
+    padding: 8px 16px;
+    text-decoration: none;
+}
+  
+.pagination a.active {
+    background-color: #6fafc7;
+    color: white;
+}
+  
+.pagination a:hover:not(.active) {
+      background-color: #ddd;
+}
+
+/* Design elements for tags */
+h2, p {
+    text-align: center;
+    font-family: 'Montserrat', sans-serif;
+}
+
+img {
+    width: 150px;
+    height: auto;
+    width: 40%;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+a, strong {
+    color: #0455A4;
+}
+
+/* Hover for hyperlinked text */
+a:hover {
+    background-color: #E8E9EA;
+  }
