@@ -11,18 +11,19 @@
 <body>
 
 <h2>UIUC Enrollment Since 1870</h2>
-<p>The line chart below visualizes total enrollment at the University of Illinois since 1870<p>
-<p>Dataset from <a href = "https://dmi.illinois.edu/stuenr/">DMI Dataset </a></p>
-<p>Click the pagnation below to navigate to the different enrollments</p>
+<p>The line chart below visualizes total enrollment at the University of Illinois since 1870 for <mark>total, undergraduates, and graduates</mark><p>
+<p><mark>Hover over the line</mark> to see how enrollment increased throughout the years at UIUC</p>
+
   
 <script>
 // Create dimensions of graph
-var margin = {top: 30, right: 20, bottom: 30, left: 55},
+var margin = {top: 30, right: 80, bottom: 30, left: 55},
     width = 500 - margin.left - margin.right,
     height = 400 - margin.top - margin.bottom;
 
 // Parse year
-var parseDate = d3.time.format("%Y").parse;
+var parseDate = d3.time.format("%Y", "").parse;
+var bisect = d3.bisector(function(d) { return d.year; }).left;
 
 // Set ranges and axes (x and y)
 var x = d3.time.scale().range([0, width]);
@@ -59,8 +60,10 @@ d3.csv("https://raw.githubusercontent.com/mpara0/uiuc-viz/main/enrollment.csv", 
 
     // Creates line
     svg.append("path")
+        .style("stroke", "#1F4096")
         .attr("class", "line")
         .attr("d", valueline(data))
+        
     
     // Add the X Axis
     svg.append("g")
@@ -75,31 +78,85 @@ d3.csv("https://raw.githubusercontent.com/mpara0/uiuc-viz/main/enrollment.csv", 
         .attr("x", width)
         .attr("y", height - 6)
         .attr("fill", "#13294b")
-        .text("(Year since 1870)");
+        .text("(Year)");
 
     // Add the Y Axis
     svg.append("g")
         .attr("class", "y axis")
         .call(yAxis);
+    
     //style Y Axis label
     svg.append("text")
         .attr("class", "axis-title")
         .attr("transform", "rotate(-90)")
         .attr("y", -45)
-        .attr("dy", "4em")
+        .attr("dy", "5em")
         .style("text-anchor", "end")
         .attr("fill", "#13294b")
         .text("(Population in thousands)");
 
+    // Create the circle that travels along the curve of chart
+var focus = svg.append("g")
+  .append('circle')
+    .style("fill", "none")
+    .attr("stroke", "black")
+    .attr('r', 8.5)
+    .style("opacity", 0)
+
+// Create the text that travels along the curve of chart
+var focusText = svg
+    .append('g')
+    .append('text')
+      .style("opacity", 0)
+      .attr("text-anchor", "left")
+      .attr("alignment-baseline", "middle")
+
+
+// Create a rect on top of the svg area: this rectangle recovers mouse position
+  svg
+    .append('rect')
+    .style("fill", "none")
+    .style("pointer-events", "all")
+    .attr('width', width)
+    .attr('height', height)
+    .on('mouseover', mouseover)
+    .on('mousemove', mousemove)
+    .on('mouseout', mouseout);
+
+  // What happens when the mouse move -> show the annotations at the right positions.
+  function mouseover() {
+    focus.style("opacity", 1)
+    focusText.style("opacity",1)
+  }
+
+  function mousemove() {
+    // recover coordinate we need
+    var x0 = x.invert(d3.mouse(this)[0]);
+    var i = bisect(data, x0, 1);
+    selectedData = data[i]
+    focus
+      .attr("dx", x(selectedData.year))
+      .attr("dy", y(selectedData.total))
+    focusText
+      .html( "total:" + selectedData.total)
+      .attr("x", x(selectedData.year))
+      .attr("y", y(selectedData.total))
+    }
+  function mouseout() {
+    focus.style("opacity", 0)
+    focusText.style("opacity", 0)
+  }
+
+
 });
 </script>
+<p><mark>Click the pagnation below</mark> to navigate to the different enrollments for undergraduates and graduates</p>
 <div class="pagination">
     <a href="#">&laquo;</a>
     <a class="active" href="#">1</a>
-    <a href="total.html">2</a>
-    <a href="ugrad.html">3</a>
-    <a href="grad.html">4</a>
-    <a href="resources.html">5</a>
+    <a href="ugrad.html">2</a>
+    <a href="grad.html">3</a>
+    <a href="resources.html">4</a>
     <a href="#">&raquo;</a>
     <div id = "chart"></div>
 </div>

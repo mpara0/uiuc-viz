@@ -21,6 +21,11 @@
       background-color: #ddd;
 }
 
+mark {
+    background-color: #ffd125;
+    font-style: italic;
+}
+
 /* Design elements for tags */
 h2, p {
     text-align: center;
@@ -65,3 +70,5 @@ svg {
     display: block;
     margin: 0 auto;
 }
+
+body { font: 12px Arial;}

@@ -10,93 +10,149 @@
 </head>
 <body>
 
-<h2>Undergraduate Enrollment</h2>
-<p>Hover over the line</p>
+<h2>Undergraduate Enrollment Since 1870</h2>
+<p><mark>Hover over the line</mark> to see how enrollment increased throughout the years for the undergraduate programs</p>
 <script>
     // Create dimensions of graph
-var margin = {top: 30, right: 20, bottom: 30, left: 60},
-    width = 500 - margin.left - margin.right,
-    height = 400 - margin.top - margin.bottom;
-
-// Parse year
-var parseDate = d3.time.format("%Y").parse;
-
-// Set ranges and axes (x and y)
-var x = d3.time.scale().range([0, width]);
-var y = d3.scale.linear().range([height, 0]);
-var xAxis = d3.svg.axis().scale(x)
-    .orient("bottom").ticks(10);
-var yAxis = d3.svg.axis().scale(y)
-    .orient("left").ticks(10);
-
-// Define the line
-var valueline = d3.svg.line()
-    .x(function(d) { return x(d.year); })
-    .y(function(d) { return y(d.undergrad); });
+    var margin = {top: 40, right: 100, bottom: 30, left: 55},
+        width = 550 - margin.left - margin.right,
+        height = 400 - margin.top - margin.bottom;
     
-// Adds the svg canvas
-var svg = d3.select("body")
-    .append("svg")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
-    .append("g")
-        .attr("transform", 
-              "translate(" + margin.left + "," + margin.top + ")");
-
-// Retrieve data from dataset
-d3.csv("https://raw.githubusercontent.com/mpara0/uiuc-viz/main/enrollment.csv", function(error, data) {
-    data.forEach(function(d) {
-        d.year = parseDate(d.year);
-        d.undergrad = +d.undergrad;
+    // Parse year
+    var parseDate = d3.time.format("%Y", "").parse;
+    var bisect = d3.bisector(function(d) { return d.year; }).left;
+    
+    // Set ranges and axes (x and y)
+    var x = d3.time.scale().range([0, width]);
+    var y = d3.scale.linear().range([height, 0]);
+    var xAxis = d3.svg.axis().scale(x)
+        .orient("bottom").ticks(10);
+    var yAxis = d3.svg.axis().scale(y)
+        .orient("left").ticks(10);
+    
+    // Define the line
+    var valueline = d3.svg.line()
+        .x(function(d) { return x(d.year); })
+        .y(function(d) { return y(d.undergrad); });
+        
+    // Adds the svg canvas
+    var svg = d3.select("body")
+        .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+            .attr("transform", 
+                  "translate(" + margin.left + "," + margin.top + ")");
+    
+    // Retrieve data from dataset
+    d3.csv("https://raw.githubusercontent.com/mpara0/uiuc-viz/main/enrollment.csv", function(error, data) {
+        data.forEach(function(d) {
+            d.year = parseDate(d.year);
+            d.undergrad = +d.undergrad;
+        });
+    
+        // Scale the range of the data
+        x.domain(d3.extent(data, function(d) { return d.year; }));
+        y.domain([0, d3.max(data, function(d) { return d.undergrad; })]);
+    
+        // Creates line
+        svg.append("path")
+            .style("stroke", "#E84A27")
+            .attr("class", "line")
+            .attr("d", valueline(data))
+            
+        
+        // Add the X Axis
+        svg.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(xAxis);
+    
+        // label X Axis
+        svg.append("text")
+            .attr("class", "x label")
+            .attr("text-anchor", "end")
+            .attr("x", width)
+            .attr("y", height - 6)
+            .attr("fill", "#13294b")
+            .text("(Year)");
+    
+        // Add the Y Axis
+        svg.append("g")
+            .attr("class", "y axis")
+            .call(yAxis);
+        
+        //style Y Axis label
+        svg.append("text")
+            .attr("class", "axis-title")
+            .attr("transform", "rotate(-90)")
+            .attr("y", -45)
+            .attr("dy", "5em")
+            .style("text-anchor", "end")
+            .attr("fill", "#13294b")
+            .text("(Population in thousands)");
+    
+        // Create the circle that travels along the curve of chart
+    var focus = svg.append("g")
+      .append('circle')
+        .style("fill", "none")
+        .attr("stroke", "black")
+        .attr('r', 8.5)
+        .style("opacity", 0)
+    
+    // Create the text that travels along the curve of chart
+    var focusText = svg
+        .append('g')
+        .append('text')
+          .style("opacity", 0)
+          .attr("text-anchor", "left")
+          .attr("alignment-baseline", "middle")
+    
+    
+    // Create a rect on top of the svg area: this rectangle recovers mouse position
+      svg
+        .append('rect')
+        .style("fill", "none")
+        .style("pointer-events", "all")
+        .attr('width', width)
+        .attr('height', height)
+        .on('mouseover', mouseover)
+        .on('mousemove', mousemove)
+        .on('mouseout', mouseout);
+    
+      // What happens when the mouse move -> show the annotations at the right positions.
+      function mouseover() {
+        focus.style("opacity", 1)
+        focusText.style("opacity",1)
+      }
+    
+      function mousemove() {
+        // recover coordinate we need
+        var x0 = x.invert(d3.mouse(this)[0]);
+        var i = bisect(data, x0, 1);
+        selectedData = data[i]
+        focus
+          .attr("dx", x(selectedData.year))
+          .attr("dy", y(selectedData.undergrad))
+        focusText
+          .html( "undergrads:" + selectedData.undergrad)
+          .attr("x", x(selectedData.year))
+          .attr("y", y(selectedData.undergrad))
+        }
+      function mouseout() {
+        focus.style("opacity", 0)
+        focusText.style("opacity", 0)
+      }
+    
+    
     });
-
-    // Scale the range of the data
-    x.domain(d3.extent(data, function(d) { return d.year; }));
-    y.domain([0, d3.max(data, function(d) { return d.undergrad; })]);
-
-    // Creates line
-    svg.append("path")
-        .attr("class", "line")
-        .attr("d", valueline(data))
-    
-    // Add the X Axis
-    svg.append("g")
-        .attr("class", "x axis")
-        .attr("transform", "translate(0," + height + ")")
-        .call(xAxis);
-
-    // label X Axis
-    svg.append("text")
-        .attr("class", "x label")
-        .attr("text-anchor", "end")
-        .attr("x", width)
-        .attr("y", height - 6)
-        .attr("fill", "#13294b")
-        .text("(Year since 1870)");
-
-    // Add the Y Axis
-    svg.append("g")
-        .attr("class", "y axis")
-        .call(yAxis);
-    //style Y Axis label
-    svg.append("text")
-        .attr("class", "axis-title")
-        .attr("transform", "rotate(-90)")
-        .attr("y", -45)
-        .attr("dy", "4em")
-        .style("text-anchor", "end")
-        .attr("fill", "#13294b")
-        .text("(Population in thousands)");
-
-});
-</script>
+    </script>
 <div class="pagination">
     <a href="#">&laquo;</a>
     <a href="index.html">1</a>
-    <a href="total.html">2</a>
-    <a class="active" href="ugrad.html">3</a>
-    <a href="grad.html">4</a>
-    <a href="resources.html">5</a>
+    <a class="active" href="ugrad.html">2</a>
+    <a href="grad.html">3</a>
+    <a href="resources.html">4</a>
     <a href="#">&raquo;</a>
 </div>
 
