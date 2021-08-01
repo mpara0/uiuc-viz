@@ -2,6 +2,7 @@
 <html>
 <head>
     <title>UIUC Enrollment Narrative</title>
+    <script src="https://d3js.org/d3.v3.min.js"></script>
     <link rel="stylesheet" href="main.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -11,7 +12,84 @@
 
 <h2>Undergraduate Enrollment</h2>
 <p>Hover over the line</p>
+<script>
+    // Create dimensions of graph
+var margin = {top: 30, right: 20, bottom: 30, left: 60},
+    width = 500 - margin.left - margin.right,
+    height = 400 - margin.top - margin.bottom;
 
+// Parse year
+var parseDate = d3.time.format("%Y").parse;
+
+// Set ranges and axes (x and y)
+var x = d3.time.scale().range([0, width]);
+var y = d3.scale.linear().range([height, 0]);
+var xAxis = d3.svg.axis().scale(x)
+    .orient("bottom").ticks(10);
+var yAxis = d3.svg.axis().scale(y)
+    .orient("left").ticks(10);
+
+// Define the line
+var valueline = d3.svg.line()
+    .x(function(d) { return x(d.year); })
+    .y(function(d) { return y(d.undergrad); });
+    
+// Adds the svg canvas
+var svg = d3.select("body")
+    .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+        .attr("transform", 
+              "translate(" + margin.left + "," + margin.top + ")");
+
+// Retrieve data from dataset
+d3.csv("https://raw.githubusercontent.com/mpara0/uiuc-viz/main/enrollment.csv", function(error, data) {
+    data.forEach(function(d) {
+        d.year = parseDate(d.year);
+        d.undergrad = +d.undergrad;
+    });
+
+    // Scale the range of the data
+    x.domain(d3.extent(data, function(d) { return d.year; }));
+    y.domain([0, d3.max(data, function(d) { return d.undergrad; })]);
+
+    // Creates line
+    svg.append("path")
+        .attr("class", "line")
+        .attr("d", valueline(data))
+    
+    // Add the X Axis
+    svg.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + height + ")")
+        .call(xAxis);
+
+    // label X Axis
+    svg.append("text")
+        .attr("class", "x label")
+        .attr("text-anchor", "end")
+        .attr("x", width)
+        .attr("y", height - 6)
+        .attr("fill", "#13294b")
+        .text("(Year since 1870)");
+
+    // Add the Y Axis
+    svg.append("g")
+        .attr("class", "y axis")
+        .call(yAxis);
+    //style Y Axis label
+    svg.append("text")
+        .attr("class", "axis-title")
+        .attr("transform", "rotate(-90)")
+        .attr("y", -45)
+        .attr("dy", "4em")
+        .style("text-anchor", "end")
+        .attr("fill", "#13294b")
+        .text("(Population in thousands)");
+
+});
+</script>
 <div class="pagination">
     <a href="#">&laquo;</a>
     <a href="index.html">1</a>

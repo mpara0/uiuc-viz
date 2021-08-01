@@ -13,38 +13,95 @@
 <h2>UIUC Enrollment Since 1870</h2>
 <p>The line chart below visualizes total enrollment at the University of Illinois since 1870<p>
 <p>Dataset from <a href = "https://dmi.illinois.edu/stuenr/">DMI Dataset </a></p>
-
-<div class="pagination">
-  <a href="#">&laquo;</a>
-  <a class="active" href="#">1</a>
-  <a href="total.html">2</a>
-  <a href="ugrad.html">3</a>
-  <a href="grad.html">4</a>
-  <a href="resources.html">5</a>
-  <a href="#">&raquo;</a>
-  <div id = "chart"></div>
+<p>Click the pagnation below to navigate to the different enrollments</p>
   
 <script>
-  // setting up the dimensions of the graph
-  var margin = {top: 10, right: 30, bottom: 30, left: 60},
-    width = 460 - margin.left - margin.right;
-    height = 460 - margin.top - margin.bottom;
-  //append svg object to the page
-  var svg = d3.select("#chart")
-  .append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", hegith + margin.top + margin.top)
-  .append("g")
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-  
-  // add X and Y axis to the graph
-  var x = d3.scaleLinear()
-    .domain([0, 4000])
-    .range([0, width])
-  svg.append("g")
-    .call(d3.axisBottom(x));
-  
+// Create dimensions of graph
+var margin = {top: 30, right: 20, bottom: 30, left: 55},
+    width = 500 - margin.left - margin.right,
+    height = 400 - margin.top - margin.bottom;
+
+// Parse year
+var parseDate = d3.time.format("%Y").parse;
+
+// Set ranges and axes (x and y)
+var x = d3.time.scale().range([0, width]);
+var y = d3.scale.linear().range([height, 0]);
+var xAxis = d3.svg.axis().scale(x)
+    .orient("bottom").ticks(10);
+var yAxis = d3.svg.axis().scale(y)
+    .orient("left").ticks(10);
+
+// Define the line
+var valueline = d3.svg.line()
+    .x(function(d) { return x(d.year); })
+    .y(function(d) { return y(d.total); });
+    
+// Adds the svg canvas
+var svg = d3.select("body")
+    .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+        .attr("transform", 
+              "translate(" + margin.left + "," + margin.top + ")");
+
+// Retrieve data from dataset
+d3.csv("https://raw.githubusercontent.com/mpara0/uiuc-viz/main/enrollment.csv", function(error, data) {
+    data.forEach(function(d) {
+        d.year = parseDate(d.year);
+        d.total = +d.total;
+    });
+
+    // Scale the range of the data
+    x.domain(d3.extent(data, function(d) { return d.year; }));
+    y.domain([0, d3.max(data, function(d) { return d.total; })]);
+
+    // Creates line
+    svg.append("path")
+        .attr("class", "line")
+        .attr("d", valueline(data))
+    
+    // Add the X Axis
+    svg.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + height + ")")
+        .call(xAxis);
+
+    // label X Axis
+    svg.append("text")
+        .attr("class", "x label")
+        .attr("text-anchor", "end")
+        .attr("x", width)
+        .attr("y", height - 6)
+        .attr("fill", "#13294b")
+        .text("(Year since 1870)");
+
+    // Add the Y Axis
+    svg.append("g")
+        .attr("class", "y axis")
+        .call(yAxis);
+    //style Y Axis label
+    svg.append("text")
+        .attr("class", "axis-title")
+        .attr("transform", "rotate(-90)")
+        .attr("y", -45)
+        .attr("dy", "4em")
+        .style("text-anchor", "end")
+        .attr("fill", "#13294b")
+        .text("(Population in thousands)");
+
+});
 </script>
+<div class="pagination">
+    <a href="#">&laquo;</a>
+    <a class="active" href="#">1</a>
+    <a href="total.html">2</a>
+    <a href="ugrad.html">3</a>
+    <a href="grad.html">4</a>
+    <a href="resources.html">5</a>
+    <a href="#">&raquo;</a>
+    <div id = "chart"></div>
 </div>
 </body>
 </html>

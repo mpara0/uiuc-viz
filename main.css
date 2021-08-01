@@ -44,3 +44,24 @@ a, strong {
 a:hover {
     background-color: #E8E9EA;
   }
+
+/* D3 Chart */
+
+path { 
+      stroke: steelblue;
+      stroke-width: 2;
+      fill: none;
+  }
+  
+.axis path,
+.axis line {
+    fill: none;
+    stroke: grey;
+    stroke-width: 1;
+    shape-rendering: crispEdges;
+}
+
+svg {
+    display: block;
+    margin: 0 auto;
+}
