@@ -2,7 +2,10 @@
 <html>
 <head>
     <title>UIUC Enrollment Narrative</title>
+    <!-- Load d3 -->
     <script src="https://d3js.org/d3.v3.min.js"></script>
+    <!-- Load d3-annotation -->
+    <script src="https://rawgit.com/susielu/d3-annotation/master/d3-annotation.min.js"></script>
     <link rel="stylesheet" href="main.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,15 +17,25 @@
 <p>The line chart below visualizes total enrollment at the University of Illinois since 1870 for <mark>total, undergraduates, and graduates</mark><p>
 <p><mark>Hover over the line</mark> to see how enrollment increased throughout the years at UIUC</p>
 
+<div>
+  <svg id="my_dataviz" height=140 width=800></svg>
+</div>
+<svg width="490" height="450" id="chart"></svg>
   
 <script>
+// select the svg area
+var svg = d3.select("#my_dataviz")
+// Handmade legend
+svg.append("circle").attr("cx",670).attr("cy",125).attr("r", 6).style("fill", "#1F4096")
+svg.append("text").attr("x", 680).attr("y", 130).text("total enrollment").style("font-size", "15px").attr("alignment-baseline","right")
+
 // Create dimensions of graph
 var margin = {top: 30, right: 80, bottom: 30, left: 55},
     width = 500 - margin.left - margin.right,
     height = 400 - margin.top - margin.bottom;
 
 // Parse year
-var parseDate = d3.time.format("%Y", "").parse;
+var parseDate = d3.time.format("%Y").parse;
 var bisect = d3.bisector(function(d) { return d.year; }).left;
 
 // Set ranges and axes (x and y)
@@ -39,13 +52,15 @@ var valueline = d3.svg.line()
     .y(function(d) { return y(d.total); });
     
 // Adds the svg canvas
-var svg = d3.select("body")
+var svg = d3.select("#chart")
     .append("svg")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
     .append("g")
         .attr("transform", 
               "translate(" + margin.left + "," + margin.top + ")");
+
+            
 
 // Retrieve data from dataset
 d3.csv("https://raw.githubusercontent.com/mpara0/uiuc-viz/main/enrollment.csv", function(error, data) {
@@ -95,8 +110,8 @@ d3.csv("https://raw.githubusercontent.com/mpara0/uiuc-viz/main/enrollment.csv", 
         .attr("fill", "#13294b")
         .text("(Population in thousands)");
 
-    // Create the circle that travels along the curve of chart
-var focus = svg.append("g")
+  // Create the circle that travels along the curve of chart
+  var focus = svg.append("g")
   .append('circle')
     .style("fill", "none")
     .attr("stroke", "black")
@@ -146,7 +161,6 @@ var focusText = svg
     focus.style("opacity", 0)
     focusText.style("opacity", 0)
   }
-
 
 });
 </script>

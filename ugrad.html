@@ -12,7 +12,16 @@
 
 <h2>Undergraduate Enrollment Since 1870</h2>
 <p><mark>Hover over the line</mark> to see how enrollment increased throughout the years for the <a href = "http://catalog.illinois.edu/undergraduate-programs/">undergraduate programs</a></p>
+<div>
+  <svg id="my_dataviz" height=140 width=800></svg>
+</div>
+<svg width="490" height="450" id="chart"></svg>
 <script>
+  // select the svg area
+var svg = d3.select("#my_dataviz")
+// Handmade legend
+svg.append("circle").attr("cx",670).attr("cy",130).attr("r", 6).style("fill", "#E84A27")
+svg.append("text").attr("x", 680).attr("y", 135).text("undergraduates").style("font-size", "15px").attr("alignment-baseline","right")
     // Create dimensions of graph
     var margin = {top: 40, right: 100, bottom: 30, left: 55},
         width = 550 - margin.left - margin.right,
@@ -36,7 +45,7 @@
         .y(function(d) { return y(d.undergrad); });
         
     // Adds the svg canvas
-    var svg = d3.select("body")
+    var svg = d3.select("#chart")
         .append("svg")
             .attr("width", width + margin.left + margin.right)
             .attr("height", height + margin.top + margin.bottom)
@@ -135,7 +144,7 @@
           .attr("dx", x(selectedData.year))
           .attr("dy", y(selectedData.undergrad))
         focusText
-          .html( "undergrads:" + selectedData.undergrad)
+          .html( "total" + selectedData.undergrad)
           .attr("x", x(selectedData.year))
           .attr("y", y(selectedData.undergrad))
         }

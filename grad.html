@@ -12,10 +12,19 @@
 
 <h2>Graduate Enrollment Since 1870</h2>
 <p><mark>Hover over the line</mark> to see how enrollment increased throughout the years for <a href = "http://catalog.illinois.edu/graduate/">graduate programs</a></p>
+<div>
+  <svg id="my_dataviz" height=140 width=800></svg>
+</div>
+<svg width="500" height="470" id="chart"></svg>
 
 <script>
+    // select the svg area
+var svg = d3.select("#my_dataviz")
+// Handmade legend
+svg.append("circle").attr("cx",670).attr("cy",125).attr("r", 6).style("fill", "#13294b")
+svg.append("text").attr("x", 680).attr("y", 130).text("graduates").style("font-size", "15px").attr("alignment-baseline","right")
     // Create dimensions of graph
-    var margin = {top: 40, right: 100, bottom: 30, left: 55},
+    var margin = {top: 50, right: 150, bottom: 30, left: 55},
         width = 550 - margin.left - margin.right,
         height = 400 - margin.top - margin.bottom;
     
@@ -37,7 +46,7 @@
         .y(function(d) { return y(d.grad); });
         
     // Adds the svg canvas
-    var svg = d3.select("body")
+    var svg = d3.select("#chart")
         .append("svg")
             .attr("width", width + margin.left + margin.right)
             .attr("height", height + margin.top + margin.bottom)
