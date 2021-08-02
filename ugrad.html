@@ -144,7 +144,7 @@ svg.append("text").attr("x", 680).attr("y", 135).text("undergraduates").style("f
           .attr("dx", x(selectedData.year))
           .attr("dy", y(selectedData.undergrad))
         focusText
-          .html( "total" + selectedData.undergrad)
+          .html( "total:" + selectedData.undergrad)
           .attr("x", x(selectedData.year))
           .attr("y", y(selectedData.undergrad))
         }
